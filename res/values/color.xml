@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="custom_status_bar_color">#ffffff</color>
+    <!--activiy 背景主色 -->
+    <color name="color_primary">#ffffff</color>
+    <!--主页侧边栏   背景主色 -->
+    <color name="color_primary_left">#25c997</color>
+    <color name="color_mainlist_bk">#f0f0f0</color>
+    <color name="color_mainlist_groupbk">#eeeeee</color>
+    <color name="color_mainlist_grouptitle">#666666</color>
+    <color name="color_mainlist_childbk_normal">#ffffff</color>
+    <color name="color_mainlist_childbk_pressed">#ebebeb</color>
+    <color name="color_mainlist_childtitle">#333333</color>
+    <!-- radiobutton背景色，默认和选中状态 -->
+    <color name="color_radiobutton_bk">#ffffff</color>
+    <color name="color_radiobutton_checked_bk">#ebfbf9</color>
+    <!-- radiobutton边框颜色，默认和选中状态 -->
+    <color name="color_radiobutton_bordercolor">#eaeaea</color>
+    <color name="color_radiobutton_checked_bordercolor">#bbe8e3</color>
+    <!-- radiobutton文字颜色，默认和选中状态 -->
+    <color name="color_radiobutton_textcolor">#333333</color>
+    <color name="color_radiobutton_checked_textcolor">#25c997</color>
+    
+    <!-- button背景颜色，默认、pressed、disable颜色 -->
+    <color name="color_button_bk">#25c997</color>
+    <color name="color_button_bk_red">#f76868</color>
+    <color name="color_button_pressed_color">#00b4a5</color>
+    <color name="color_button_pressed_red_color">#EF1616</color>
+    <color name="color_button_disable_color">#b7b7b7</color>
+    <!-- button边框颜色,diable时边框颜色 -->
+    <color name="color_button_border_color">#00c7b6</color>
+    <color name="color_button_border_red_color">#F35050</color>
+    <color name="color_button_disable_border_color">#d6d6d6</color>
+    
+    <!-- button文字颜色 -->
+    <color name="color_button_text_color">#00c7b6</color>
+    
+    <color name="device_activity_bk">#eeeeee</color>
+    
+    <color name="login_btn">#f78d3e</color>
+    <color name="white">#ffffffff</color>
+    <color name="black">#ff000000</color>
+    <color name="gray">#ff666666</color>
+    <color name="add_equ_step_bg">#D9D9D9</color>
+    <color name="bt_enable_false">#a9a9a9</color>
+    
+    <!--时间选择窗口颜色  -->
+    <color name="background">#FFFFFF</color>
+    <color name="split_line">#11112233</color>
+    <color name="text1">#58d3c3</color>
+    <color name="text2">#333333</color>
+
+    <color name="color1">#F0F0F0</color>
+    <color name="color2">#FFFFFF</color>
+    <color name="color3">#B0B0B0</color>
+    <color name="color4">#666666</color>
+    <color name="color5">#57C5E8</color>
+    
+    <color name="time_zone_checked_text_color">#1C70CB</color>
+    
+    <!-- 循环定时设置页面 -->
+    <!-- 循环定时设置页面的表头的背景颜色-->
+    <color name="color_schedule_list_title">#f0f0f0</color>
+    <!-- 循环定时设置页面的星期的背景颜色-->
+    <color name="color_schedule_week_bk">#25c997</color>
+    <color name="color_schedule_week_bk1">#dbfff4</color>
+</resources>
