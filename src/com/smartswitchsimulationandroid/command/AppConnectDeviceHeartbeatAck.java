@@ -1,27 +1,26 @@
 package com.smartswitchsimulationandroid.command;
 
-/**
- * 
- * @ClassName: AppConnectDeviceHeartbeatAck
- * @Description: 5.5.3 当设备收到心跳消息返回数据包
- * @author wx
- * @date 2016年12月23日
- *
- */
 public class AppConnectDeviceHeartbeatAck {
-	int ProtocolVer;
-	int VarLen;
-	int Flag;
-	int Cmd;
+	byte [] data ;
+	
+	public  AppConnectDeviceHeartbeatAck(){
+		data = new byte[8];
+		data[0] = 0x00;
+		data[1] = 0x00;
+		data[2] = 0x00;
+		data[3] = 0x03; // PackHeader =0x00000003;
+		data[4] = 0x08; // PackLength =0x0e
+		data[5] = 0x00; // Flag = 0x00;
+		data[6] = 0x00;
+		data[7] = 0x0f; // CommandWord = 0x000f
 
-	public AppConnectDeviceHeartbeatAck(byte[] receiveData) {
-		// Pack_Header
-		ProtocolVer = (receiveData[0] & 0xff << 24) | (receiveData[1] & 0xff << 16) | (receiveData[2] & 0xff << 8) | (receiveData[3] & 0xff);
-		// Pack_Length
-		VarLen = receiveData[4] & 0xff;
-		// Flag
-		Flag = receiveData[5] & 0xff;
-		// Command_Type
-		Cmd = ((receiveData[6] & 0xff) << 8) | (receiveData[7] & 0xff);
+	}
+	
+	public byte[] getData(){
+		return data;
+	}
+	
+	public int dataLength() {
+		return data.length;
 	}
 }

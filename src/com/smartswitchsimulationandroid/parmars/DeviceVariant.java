@@ -2,11 +2,11 @@ package com.smartswitchsimulationandroid.parmars;
 
 import java.util.List;
 
+import com.smartswitchsimulationandroid.mqtt.MyMqtt;
 import com.smartswitchsimulationandroid.udptcp.ReceiveDataHandle;
+import com.smartswitchsimulationandroid.udptcp.ReceivePoolUDP;
 
 //import com.chinesetimer.device.AllDeviceList;
-//import com.chinesetimer.mqtt.MyMqtt;
-//import com.chinesetimer.updtcp.ReceiveDataHandle;
 //import com.chinesetimer.updtcp.ReceivePoolUDP;
 //import com.chinesetimer.updtcp.SendPoolUDP;
 //import com.chinesetimer.updtcp.TCPorMQTTInterface;
@@ -16,14 +16,14 @@ import android.media.SoundPool;
 
 /** 设置系统级别的常量 */
 public class DeviceVariant {
-	/** 搜索wifi模块的UDP广播发送次数，每次间隔1秒 */
-	public static final int SearchWifiMaxTimes = 3;
+	/** 设备上线UDP广播发送次数，每次间隔1秒 */
+	public static final int DeviceOnlineMaxTimes = 3;
 	/** 存放搜索wifi的UDP广播发送之后，接收到的所有响应设备信息列表，存放设备的IP地址，以及DID、MACAdd、ProduceKey */
 //	public static AllDeviceList ctAllDeivceList = new AllDeviceList();
 //
-//	public static ReceivePoolUDP umReceivePoolUdp;
+    public static ReceivePoolUDP umReceivePoolUdp;
 //	public static ReceiveDataHandle umReceiveDataHandle;
-//	public static MyMqtt umMqtt;
+	public static MyMqtt umMqtt;
 //
 //	// 在设备控制页面和设备设置页面直接传递tcp、mqtt链接。
 //	public static TCPorMQTTInterface mTcPorMQTTInterface;
@@ -32,10 +32,10 @@ public class DeviceVariant {
 	public static final int MaxResendCount = 30;
 
 	/** app监听UDP协议端口号 */
-	public static final int AppUDPListeningPort = 12414;
+	public static final int AppUDPListeningPort = 2415;
 
 	/** 设备UDP协议端口号 */
-	public static final int DeviceUDPListeningPort = 2415;
+	public static final int DeviceUDPListeningPort = 12414;
 	
 	/** 设备TCP协议端口号 */
 	public static final int DeviceTCPServerPort = 12416;
@@ -87,12 +87,15 @@ public class DeviceVariant {
 	public static final int QueryDeviceParamsAck = 0x04;
 
 	/** 设备模式切换指令 */
+	public static final int DeviceModeChange = 0x05;
 	public static final int DeviceModeChangeAck = 0x06;
 
 	/** 设备循环定时指令 */
+	public static final int DeviceCycleTiming = 0x07;
 	public static final int DeviceCycleTimingAck = 0x08;
 
 	/** 设备倒计时指令 */
+	public static final int DeviceCountDown = 0x09;
 	public static final int DeviceCountDownAck = 0x0a;
 
 	/** 工作模式，手动 */

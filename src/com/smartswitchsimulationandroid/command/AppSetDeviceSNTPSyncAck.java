@@ -1,35 +1,28 @@
 package com.smartswitchsimulationandroid.command;
 
-/**
- * 
- * @ClassName: AppSetDeviceSNTPSyncAck
- * @Description : 6.5.2.5 设备对启动/停止时间同步的响应
- * @author wx
- * @date 2016年12月21日
- *
- */
 public class AppSetDeviceSNTPSyncAck {
-	int ProtocolVer;
-	int VarLen;
-	int Flag;
-	int Cmd;
-	public boolean result;// 表示启动/停止时间同步是否成功，true：成功，false ：失败
-	public byte SNTPEnable;
-
-	public AppSetDeviceSNTPSyncAck(byte[] receiveData) {
-
-		// Pack_Header
-		ProtocolVer = (receiveData[0] & 0xff << 24) | (receiveData[1] & 0xff << 16) | (receiveData[2] & 0xff << 8) | (receiveData[3] & 0xff);
-		// Pack_Length
-		VarLen = receiveData[4] & 0xff;
-		// Flag
-		Flag = receiveData[5] & 0xff;
-		// Command_Type
-		Cmd = ((receiveData[6] & 0xff) << 8) | (receiveData[7] & 0xff);
-		if ((receiveData[8] & 0xff) == 0)
-			result = true;
-		else
-			result = false;
-		SNTPEnable = receiveData[9];
+	byte[] data;
+	
+	public AppSetDeviceSNTPSyncAck(int OperationState, int SNTPEnable){
+		data  = new byte [10];
+		data[0] = 0x00;
+		data[1] = 0x00;
+		data[2] = 0x00;
+		data[3] = 0x03; // PackHeader =0x00000003;
+		data[4] = 0x0a; // PackLength =0x03
+		data[5] = 0x00; // Flag = 0x00;
+		data[6] = 0x00;
+		data[7] = 0x0d; // CommandWord = 0x000d
+		data[8] = (byte) OperationState;
+		data[9] = (byte) SNTPEnable;
+		
+	}
+	
+	public byte[] getData(){
+		return data;
+	}
+	
+	public int dataLength() {
+		return data.length;
 	}
 }

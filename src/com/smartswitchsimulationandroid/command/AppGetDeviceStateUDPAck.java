@@ -1,97 +1,38 @@
 package com.smartswitchsimulationandroid.command;
 
-import com.smartswitchsimulationandroid.udptcp.UDPData;
+import java.util.Calendar;
 
 public class AppGetDeviceStateUDPAck {
-	public byte[] status;
-	public byte MQTTEnable;
-	/** 用于控制协议部分的varlen部分，当超过128时需要使用2位，超过16384需要使用3位..... */
-	protected int delta = 0;
-	/** 头部固定的长度 */
-	protected int hearderLength = 0;
-	protected int ProtocolVer;
-	public int VarLen;
-	public int Flag;
-	public int Cmd;
-	public String ip;
-
-	public AppGetDeviceStateUDPAck(UDPData udpData) {
-		byte[] receiveData = udpData.data;
-		init(receiveData);
-
-		status = new byte[8];
-		System.arraycopy(receiveData, hearderLength + delta, status, 0, 8); // 设备的时间信息
-		ip = udpData.IP;
-		MQTTEnable = receiveData[hearderLength + delta + 8];
+	byte[] data;
+	Calendar cal = Calendar.getInstance(); 
+	
+	public AppGetDeviceStateUDPAck(int WorkMode, int OutputState, int MQTTEnable){
+		data  = new byte [17];
+		data[0] = 0x00;
+		data[1] = 0x00;
+		data[2] = 0x00;
+		data[3] = 0x03; // PackHeader =0x00000003;
+		data[4] = 0x11; // PackLength =0x03
+		data[5] = 0x00; // Flag = 0x00;
+		data[6] = 0x00;
+		data[7] = 0x11; // CommandWord = 0x0011
+		data[8] = (byte) (cal.get(Calendar.YEAR)-2000);
+		data[9] = (byte) (cal.get(Calendar.MONTH)+1);
+		data[10] = (byte) cal.get(Calendar.DAY_OF_MONTH);
+		data[11] = (byte) cal.get(Calendar.HOUR_OF_DAY);
+		data[12] = (byte) cal.get(Calendar.MINUTE);
+		data[13] = (byte) cal.get(Calendar.SECOND);
+		data[14] = (byte) WorkMode;
+		data[15] = (byte) OutputState;
+		data[16] = (byte) MQTTEnable;
+		
 	}
-
-	private void init(byte[] receiveData) {
-		// Pack_Header
-		ProtocolVer = (receiveData[0] & 0xff << 24) | (receiveData[1] & 0xff << 16) | (receiveData[2] & 0xff << 8) | (receiveData[3] & 0xff);
-		// Pack_Length
-		do {
-			int num = receiveData[4 + delta] & 0x7f;
-			int i = delta;
-			while (i > 0) {
-				num *= 128;
-				i--;
-			}
-			VarLen += num;
-		} while ((receiveData[4 + delta++] & 0x80) == 0x80);
-		delta--;
-		// Flag
-		Flag = receiveData[5 + delta] & 0xff;
-		// Command_Type
-		Cmd = ((receiveData[6 + delta] & 0xff) << 8) | (receiveData[7 + delta] & 0xff);
-
-		// 以上头部总共8字节
-		hearderLength = 8;
+	
+	public byte[] getData(){
+		return data;
 	}
-	// public byte[] time;
-	// /**用于控制协议部分的varlen部分，当超过128时需要使用2位，超过16384需要使用3位.....*/
-	// protected int delta = 0;
-	// /**头部固定的长度*/
-	// protected int hearderLength = 0;
-	// protected int ProtocolVer;
-	// public int VarLen;
-	// public int Flag;
-	// public int Cmd;
-	// /**当前工作模式。0：手动；1：循环定时；2：倒计时*/
-	// public int workMode;
-	// /**输出状态;0：关闭；1：开启。*/
-	// public int outputState;
-	// public AppGetDeviceStateUDPAck(UDPData udpData){
-	// byte[] receiveData =udpData.data;
-	// init(receiveData);
-	// time = new byte[6];
-	// System.arraycopy(receiveData, hearderLength
-	// + delta, time, 0, 6); //设备的时间信息
-	// workMode = receiveData[hearderLength + 6 + delta] & 0xff;
-	// outputState = receiveData[hearderLength + 7 + delta] & 0xff;
-	// }
-	// private void init(byte[] receiveData){
-	// // Pack_Header
-	// ProtocolVer = (receiveData[0] & 0xff << 24)
-	// | (receiveData[1] & 0xff << 16) | (receiveData[2] & 0xff << 8)
-	// | (receiveData[3] & 0xff);
-	// // Pack_Length
-	// do {
-	// int num = receiveData[4 + delta] & 0x7f;
-	// int i = delta;
-	// while (i > 0) {
-	// num *= 128;
-	// i--;
-	// }
-	// VarLen += num;
-	// } while ((receiveData[4 + delta++] & 0x80) == 0x80);
-	// delta--;
-	// // Flag
-	// Flag = receiveData[5 + delta] & 0xff;
-	// // Command_Type
-	// Cmd = ((receiveData[6 + delta] & 0xff) << 8)
-	// | (receiveData[7 + delta] & 0xff);
-	//
-	// //以上头部总共8字节
-	// hearderLength = 8;
-	// }
+	
+	public int dataLength() {
+		return data.length;
+	}
 }

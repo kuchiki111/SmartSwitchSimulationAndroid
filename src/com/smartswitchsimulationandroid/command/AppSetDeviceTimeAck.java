@@ -1,35 +1,35 @@
 package com.smartswitchsimulationandroid.command;
 
-/**
- * 
- * @ClassName: AppAdjustDeviceTimeAck
- * @Description:5.5.1 设备收到调整时间信息包后响应
- * @author wx
- * @date 2016年12月21日
- *
- */
-public class AppSetDeviceTimeAck {
-	int ProtocolVer;
-	int VarLen;
-	int Flag;
-	int Cmd;
-	public byte time[];
-	public boolean result;// 表示调整时间是否成功，true：成功，false ：失败
+import java.util.Calendar;
 
-	public AppSetDeviceTimeAck(byte[] receiveData) {
-		// Pack_Header
-		ProtocolVer = (receiveData[0] & 0xff << 24) | (receiveData[1] & 0xff << 16) | (receiveData[2] & 0xff << 8) | (receiveData[3] & 0xff);
-		// Pack_Length
-		VarLen = receiveData[4] & 0xff;
-		// Flag
-		Flag = receiveData[5] & 0xff;
-		// Command_Type
-		Cmd = ((receiveData[6] & 0xff) << 8) | (receiveData[7] & 0xff);
-		if ((receiveData[8] & 0xff) == 0)
-			result = true;
-		else
-			result = false;
-		time = new byte[6];
-		System.arraycopy(receiveData, 9, time, 0, 5); // 设备返回的时间
+public class AppSetDeviceTimeAck {
+	byte[] data;
+	Calendar cal = Calendar.getInstance(); 
+	
+	public AppSetDeviceTimeAck(int WorkMode, int OutputState, int MQTTEnable){
+		data  = new byte [14];
+		data[0] = 0x00;
+		data[1] = 0x00;
+		data[2] = 0x00;
+		data[3] = 0x03; // PackHeader =0x00000003;
+		data[4] = 0x0e; // PackLength =0x03
+		data[5] = 0x00; // Flag = 0x00;
+		data[6] = 0x00;
+		data[7] = 0x1b; // CommandWord = 0x001b
+		data[8] = (byte) (cal.get(Calendar.YEAR)-2000);
+		data[9] = (byte) (cal.get(Calendar.MONTH)+1);
+		data[10] = (byte) cal.get(Calendar.DAY_OF_MONTH);
+		data[11] = (byte) cal.get(Calendar.HOUR_OF_DAY);
+		data[12] = (byte) cal.get(Calendar.MINUTE);
+		data[13] = (byte) cal.get(Calendar.SECOND);
+		
+	}
+	
+	public byte[] getData(){
+		return data;
+	}
+	
+	public int dataLength() {
+		return data.length;
 	}
 }

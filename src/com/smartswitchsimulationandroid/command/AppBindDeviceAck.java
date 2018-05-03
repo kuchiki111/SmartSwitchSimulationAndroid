@@ -1,40 +1,28 @@
 package com.smartswitchsimulationandroid.command;
 
-/**
- * 5.3.2 设备响应APP绑定命令的信息包格式<br>
- * TCP数据包发送，目标端口12416
- */
-
 public class AppBindDeviceAck {
-
-	int ProtocolVer;
-	public int VarLen;
-	public int Flag;
-	public int Cmd;
-	public int PasscodeLen;
-	public String Passcode;
-	public boolean result;// 额外增加，表示绑定成功与否，协议中无此字段
-
-	public AppBindDeviceAck(byte[] receiveData) {
-
-		// Pack_Header
-		ProtocolVer = (receiveData[0] & 0xff << 24) | (receiveData[1] & 0xff << 16) | (receiveData[2] & 0xff << 8) | (receiveData[3] & 0xff);
-		// Pack_Length
-		VarLen = receiveData[4] & 0xff;
-		// Flag
-		Flag = receiveData[5] & 0xff;
-		// Command_Type
-		Cmd = ((receiveData[6] & 0xff) << 8) | (receiveData[7] & 0xff);
-		PasscodeLen = ((receiveData[8] & 0xff) << 8) | (receiveData[9] & 0xff);
-		// passCodeLen为0时表示不可绑定
-		if (PasscodeLen == 0) {
-			Passcode = null;
-			result = false;
-		} else {
-			byte[] bytePasscode = new byte[PasscodeLen];
-			System.arraycopy(receiveData, 10, bytePasscode, 0, PasscodeLen);
-			Passcode = new String(bytePasscode);
-			result = true;
-		}
+	byte [] data ;
+	
+	public  AppBindDeviceAck(String PassCode){
+		data = new byte[14];
+		data[0] = 0x00;
+		data[1] = 0x00;
+		data[2] = 0x00;
+		data[3] = 0x03; // PackHeader =0x00000003;
+		data[4] = 0x0e; // PackLength =0x0e
+		data[5] = 0x00; // Flag = 0x00;
+		data[6] = 0x00;
+		data[7] = 0x05; // CommandWord = 0x0005
+		data[8] = 0x00;
+		data[9] = 0x04;//PassCodeLength
+		System.arraycopy(PassCode.getBytes(), 0, data, 10, 4);
+	}
+	
+	public byte[] getData(){
+		return data;
+	}
+	
+	public int dataLength() {
+		return data.length;
 	}
 }

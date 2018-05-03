@@ -1,46 +1,122 @@
 package com.smartswitchsimulationandroid.command;
 
+import java.util.Calendar;
+import java.util.List;
+
+import com.smartswitchsimulationandroid.device.TimeSettingInfo;
 
 public class AppControlSocketAckBase {
-	/** 用于控制协议部分的varlen部分，当超过128时需要使用2位，超过16384需要使用3位..... */
-	protected int delta = 0;
-	/** 头部固定的长度 */
-	protected int hearderLength = 0;
-	protected int ProtocolVer;
-	public int VarLen;
-	public int Flag;
-	public int Cmd;
-	public int operationState;
-	public String SN;
-	public int functionType;
-	public int actionType;
+	byte[] data;
+	static int sn = 0;
+	int delta = 0;
+	Calendar cal = Calendar.getInstance();
+	
+	public void init(int dataLength,int OperationState){
+		
+		if (dataLength < 128 + 5)
+			data = new byte[dataLength];
+		else if (dataLength <= 16383 + 5)
+			data = new byte[dataLength + 1];
+		else if (dataLength >= 2097151 + 5)
+			data = new byte[dataLength + 2];
+		else if (dataLength >= 268435455 + 5)
+			data = new byte[dataLength + 3];
+		else {
+			data = new byte[dataLength + 3];
+			dataLength = 268435455 + 5;
+		}
+		
+		data[0] = 0x00;
+		data[1] = 0x00;
+		data[2] = 0x00;
+		data[3] = 0x03; // PackHeader =0x00000003;
+		data[4] = 0x36; // PackLength =0x03
+		data[6] = 0x00;
+		data[7] = -0x6b; // CommandWord = 0x0094
+		data[8] = (byte) OperationState;
+		data[9 + delta] = (byte) (sn & 0xff); // sn,消息的序号，用于消息的ACK
+		data[10 + delta] = (byte) ((sn >> 8) & 0xff);
+		data[11 + delta] = (byte) ((sn >> 16) & 0xff);
+		data[12 + delta] = (byte) ((sn >> 24) & 0xff);
+	}
+	
+	public AppControlSocketAckBase(int OperationState,int WorkMode, int OutputState, int MQTTEnable){
+		init(24, OperationState);
+		
+		data[13 + delta] = 0x01;
+		data[14 + delta] = 0x02;	//ActionCode
+		data[15 + delta] = (byte) (cal.get(Calendar.YEAR)-2000);
+		data[16 + delta] = (byte) (cal.get(Calendar.MONTH)+1);
+		data[17 + delta] = (byte) cal.get(Calendar.DAY_OF_MONTH);	//DriverDate
+		data[18 + delta] = (byte) cal.get(Calendar.HOUR_OF_DAY);
+		data[19 + delta] = (byte) cal.get(Calendar.MINUTE);
+		data[20 + delta] = (byte) cal.get(Calendar.SECOND);			//DriverTime
+		data[21 + delta] = (byte) WorkMode;
+		data[22 + delta] = (byte) OutputState;
+		data[23 + delta] = (byte) MQTTEnable;
+	}
+	
+	public AppControlSocketAckBase(int OperationState,List<TimeSettingInfo> timeSettingInfos ){
+		int timesCount = timeSettingInfos.size();
+		byte[] timeInfoBytes = new byte[timesCount * 9];
 
-	public AppControlSocketAckBase(byte[] receiveData) {
-		// Pack_Header
-		ProtocolVer = (receiveData[0] & 0xff << 24) | (receiveData[1] & 0xff << 16) | (receiveData[2] & 0xff << 8) | (receiveData[3] & 0xff);
-		// Pack_Length
-		do {
-			int num = receiveData[4 + delta] & 0x7f;
-			int i = delta;
-			while (i > 0) {
-				num *= 128;
-				i--;
-			}
-			VarLen += num;
-		} while ((receiveData[4 + delta++] & 0x80) == 0x80);
-		delta--;
-		// Flag
-		Flag = receiveData[5 + delta] & 0xff;
-		// Command_Type
-		Cmd = ((receiveData[6 + delta] & 0xff) << 8) | (receiveData[7 + delta] & 0xff);
-		// OperationState
-		operationState = receiveData[8 + delta] & 0xff;
-		// SN
-		byte[] SNBytes = new byte[4];
-		System.arraycopy(receiveData, 9 + delta, SNBytes, 0, 4);
-		SN = new String(SNBytes);
-		functionType = receiveData[13 + delta] & 0xff;
-		actionType = receiveData[14 + delta] & 0xff;
-		hearderLength = 15;
+		for (int i = 0; i < timesCount; i++) {
+			System.arraycopy(timeSettingInfos.get(i).getData(), 0, timeInfoBytes, i * 9, 9);
+		}
+		
+		init(15 + timeInfoBytes.length, OperationState); 
+		
+		data[13 + delta] = 0x01;
+		data[14 + delta] = 0x04;	//ActionCode
+		System.arraycopy(timeInfoBytes, 0, data, 15 + delta, timeInfoBytes.length);
+	}
+	
+	public AppControlSocketAckBase(int OperationState,int WorkMode, int OutputState){
+		
+		init(23, OperationState);
+		
+		data[13 + delta] = 0x01;
+		data[14 + delta] = 0x06;	//ActionCode
+		data[15 + delta] = (byte) (cal.get(Calendar.YEAR)-2000);
+		data[16 + delta] = (byte) (cal.get(Calendar.MONTH)+1);
+		data[17 + delta] = (byte) cal.get(Calendar.DAY_OF_MONTH);	//DriverDate
+		data[18 + delta] = (byte) cal.get(Calendar.HOUR_OF_DAY);
+		data[19 + delta] = (byte) cal.get(Calendar.MINUTE);
+		data[20 + delta] = (byte) cal.get(Calendar.SECOND);			//DriverTime
+		data[21 + delta] = (byte) WorkMode;
+		data[22 + delta] = (byte) OutputState;
+	}
+	
+	public AppControlSocketAckBase(int OperationState, int ParameterCount, List<TimeSettingInfo> timeSettingInfos ){
+		int timesCount = timeSettingInfos.size();
+		byte[] timeInfoBytes = new byte[timesCount * 9];
+
+		for (int i = 0; i < timesCount; i++) {
+			System.arraycopy(timeSettingInfos.get(i).getData(), 0, timeInfoBytes, i * 9, 9);
+		}
+		
+		init(16 + timeInfoBytes.length, OperationState); 
+		
+		data[13 + delta] = 0x01;
+		data[14 + delta] = 0x08;	//ActionCode
+		data[15 + delta] = (byte) ParameterCount;
+		System.arraycopy(timeInfoBytes, 0, data, 16 + delta, timeInfoBytes.length);
+
+	}
+	
+	public AppControlSocketAckBase(int OperationState,byte[] delayTime, byte[] duration, int completedMode, int completedOutputState){		
+		init(21, OperationState); 
+		
+		data[13 + delta] = 0x01;
+		data[14 + delta] = 0x0a;	//ActionCode
+		System.arraycopy(delayTime, 0, data, 15, 2); // Delay 延迟x小时y分钟后执行倒计时
+		System.arraycopy(duration, 0, data, 17, 2); // Duration 倒计时持续时间x小时，y分钟
+		data[19 + delta] = (byte) completedMode;
+		data[20 + delta] = (byte) completedOutputState;
+
+	}
+	
+	public byte[] getData() {
+		return data;
 	}
 }

@@ -1,9 +1,16 @@
-//package com.smartswitchsimulationandroid.udptcp;
-//
-//import java.io.Serializable;
-//import java.util.ArrayList;
-//import java.util.List;
-//
+package com.smartswitchsimulationandroid.udptcp;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.smartswitchsimulationandroid.command.AppControlSocket;
+import com.smartswitchsimulationandroid.command.AppGetDeviceState;
+import com.smartswitchsimulationandroid.command.AppGetDeviceStateUDP;
+import com.smartswitchsimulationandroid.constant.ActivityHandlerParams;
+import com.smartswitchsimulationandroid.parmars.DeviceVariant;
+import com.smartswitchsimulationandroid.parmars.ToolParams;
+
 //import com.chinesetimer.command.AppGetDeviceRSSIAck;
 //import com.chinesetimer.command.AppGetDeviceStateMqttAck;
 //import com.chinesetimer.command.AppSetDeviceSNTPSyncAck;
@@ -23,115 +30,159 @@
 //import com.chinesetimer.constant.MainActivityHandlerParams;
 //import com.chinesetimer.params.AppVariant;
 //import com.chinesetimer.params.ToolParams;
-//
-//import android.content.Context;
-//import android.os.Handler;
-//import android.os.Message;
-//import android.util.Log;
-//
-//public abstract class TCPorMQTTInterface {
-//
-//	abstract public Boolean init(String serverIP, int serverPort, Handler handler);
-//
-//	abstract public void insertItem(byte[] item, boolean withRelatedDevices);
-//
-//	public abstract void insertItemWithResend(byte[] item, boolean withRelatedDevices);
-//
-//	public void stop() {
-//		isStopped = true;
-//	};
-//
-//	abstract public Boolean init(Context context, String[] publishTopic, String[] myTopics, Handler handler);
-//
-//	public abstract void changePublishTopic(String[] topics);
-//
-//	// 重发队列的数组
-//	protected List<ResendItem> resendList = new ArrayList<ResendItem>();
-//	protected Context mContext;
-//	public Handler mHandler;
-//
-//	public class ResendItem {
-//		public byte[] item;
-//		/** 重发次数 */
-//		public int resendCount;
-//		public String topics[];// 表示发送到那个Topic中，mqtt中使用，tcp中无效
-//		/** 计时次数，记为4,2,0各发送一次，每过500毫秒累减一次，初始值6，以避免已加入重发队列，马上发送一次的问题 */
-//		public int timeCount;
-//
-//		public ResendItem(byte[] item) {
-//			this.item = item;
-//			this.resendCount = 0;
-//			timeCount = 6;
-//			this.topics = null;
-//		}
-//
-//		public ResendItem(byte[] item, String[] topic) {
-//			this.item = item;
-//			this.resendCount = 0;
-//			timeCount = 6;
-//			this.topics = topics;
-//		}
-//	}
-//
-//	protected boolean isStopped = false;
-//
-//	/**
-//	 * 重发线程类
-//	 * 
-//	 * @author hxc
-//	 *
-//	 */
-//	protected class ResendThread extends Thread {
-//
-//		public ResendThread() {
-//			// TODO Auto-generated constructor stub
-//		}
-//
-//		@Override
-//		public void run() {
-//
-//			while (!isStopped) {
-//				try {
-//					Thread.sleep(500);// 每过500ms轮询一次
-//					// Log.i("TCP","重发检测");
-//					for (int i = 0; i < resendList.size(); i++) {
-//						ResendItem resend_item = resendList.get(i);
-//						resend_item.timeCount--;
-//						if (resend_item.timeCount == 4 || resend_item.timeCount == 2 || resend_item.timeCount == 0) {
-//							Log.i("TCPResend", "重发" + resend_item.resendCount);
-//							insertItem(resend_item.item, false);
-//							Thread.sleep(10);// 两次发包之间间隔10ms
-//
-//							if (++resend_item.resendCount >= 3) {// 重发次数满3次，从重发队列删除
-//								resendList.remove(i);
-//								i--;
-//							}
-//						}
-//					}
-//				} catch (InterruptedException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}
-//
-//	}
-//
-//	/**
-//	 * tcp和mqtt统一的接收数据处理方法
-//	 * 
-//	 * @param data
-//	 * @param mHandler
-//	 */
-//	public void handler(byte[] data, Handler mHandler, String DID) {
-//		if (data.length >= 8) {
-//			// Log.d("MQTT", Hex.encodeHexStr(data));
-//			int delta = ToolParams.getVarlenDelta(data);
-//			int CMD = ((data[6 + delta] << 8) & 0xff00) | (data[7 + delta] & 0xff);
-//			// Log.i("MQTT","CMD="+String.format("%x", CMD));
-//			if (mHandler != null) {
+
+import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+
+public abstract class TCPorMQTTInterface {
+
+	abstract public Boolean init(String serverIP, int serverPort, Handler handler);
+
+	abstract public void insertItem(byte[] item, boolean withRelatedDevices);
+
+	public abstract void insertItemWithResend(byte[] item, boolean withRelatedDevices);
+
+	public void stop() {
+		isStopped = true;
+	};
+
+	abstract public Boolean init(Context context, String[] publishTopic, String[] myTopics, Handler handler);
+
+	public abstract void changePublishTopic(String[] topics);
+
+	// 重发队列的数组
+	protected List<ResendItem> resendList = new ArrayList<ResendItem>();
+	protected Context mContext;
+	public Handler mHandler;
+
+	public class ResendItem {
+		public byte[] item;
+		/** 重发次数 */
+		public int resendCount;
+		public String topics[];// 表示发送到那个Topic中，mqtt中使用，tcp中无效
+		/** 计时次数，记为4,2,0各发送一次，每过500毫秒累减一次，初始值6，以避免已加入重发队列，马上发送一次的问题 */
+		public int timeCount;
+
+		public ResendItem(byte[] item) {
+			this.item = item;
+			this.resendCount = 0;
+			timeCount = 6;
+			this.topics = null;
+		}
+
+		public ResendItem(byte[] item, String[] topic) {
+			this.item = item;
+			this.resendCount = 0;
+			timeCount = 6;
+			this.topics = topics;
+		}
+	}
+
+	protected boolean isStopped = false;
+
+	/**
+	 * 重发线程类
+	 * 
+	 * @author hxc
+	 *
+	 */
+	protected class ResendThread extends Thread {
+
+		public ResendThread() {
+			// TODO Auto-generated constructor stub
+		}
+
+		@Override
+		public void run() {
+
+			while (!isStopped) {
+				try {
+					Thread.sleep(500);// 每过500ms轮询一次
+					// Log.i("TCP","重发检测");
+					for (int i = 0; i < resendList.size(); i++) {
+						ResendItem resend_item = resendList.get(i);
+						resend_item.timeCount--;
+						if (resend_item.timeCount == 4 || resend_item.timeCount == 2 || resend_item.timeCount == 0) {
+							Log.i("TCPResend", "重发" + resend_item.resendCount);
+							insertItem(resend_item.item, false);
+							Thread.sleep(10);// 两次发包之间间隔10ms
+
+							if (++resend_item.resendCount >= 3) {// 重发次数满3次，从重发队列删除
+								resendList.remove(i);
+								i--;
+							}
+						}
+					}
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * tcp和mqtt统一的接收数据处理方法
+	 * 
+	 * @param data
+	 * @param mHandler
+	 */
+	public void handler(byte[] data, Handler mHandler, String DID) {
+		if (data.length >= 8) {
+			// Log.d("MQTT", Hex.encodeHexStr(data));
+			int delta = ToolParams.getVarlenDelta(data);
+			int CMD = ((data[6 + delta] << 8) & 0xff00) | (data[7 + delta] & 0xff);
+			// Log.i("MQTT","CMD="+String.format("%x", CMD));
+			if (mHandler != null) {
+				switch (CMD) {
+				case UDPTCPCommand.APP_GET_DEVICE_STATE_UDP:{
+					AppGetDeviceStateUDP request = new AppGetDeviceStateUDP(data);
+					Message msg = new Message();
+					msg.obj = request;
+					msg.what = ActivityHandlerParams.AppGetDeviceStateMQTT;
+					mHandler.sendMessage(msg);		
+				}
+					break;
+				case UDPTCPCommand.APP_CONTROL_SOCKET_ACK: {
+					AppControlSocket appControlSocket = new AppControlSocket(data);
+					Message msg = new Message();
+					switch(appControlSocket.ActionCode){
+					case DeviceVariant.QueryDeviceStatus:{
+						msg.what = ActivityHandlerParams.AppGetDeviceParams;
+						mHandler.sendMessage(msg);
+					}
+						break;
+					case DeviceVariant.QueryDeviceParams:{
+						msg.what = ActivityHandlerParams.AppGetDeviceStateUDP;
+						mHandler.sendMessage(msg);
+						
+					}
+						break;	
+						
+					case DeviceVariant.DeviceModeChange:{
+						
+					}
+						break;	
+					case DeviceVariant.DeviceCycleTiming:{
+						
+					}
+						break;	
+					case DeviceVariant.DeviceCountDown:{
+						
+					}
+						break;	
+					}
+					
+				}
+					break;
+				default:
+					break;
+				}
 //				switch (CMD) {
 //				// 注意本条是在mqtt中发送本来udp使用的获取所有设备状态的广播包协议（硬件实际也支持mqtt协议发送）
 //				// 会转移到ActivitieMain中进行处理
@@ -312,7 +363,7 @@
 //				default:
 //					break;
 //				}
-//			}
-//		}
-//	}
-//}
+			}
+		}
+	}
+}

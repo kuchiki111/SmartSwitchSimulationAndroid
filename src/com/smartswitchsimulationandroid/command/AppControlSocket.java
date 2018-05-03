@@ -5,6 +5,9 @@ package com.smartswitchsimulationandroid.command;
  * @create_date 2018年4月27日上午5:54:07
  */
 public class AppControlSocket {
+	protected int delta = 0;
+	/** 头部固定的长度 */
+	protected int hearderLength = 0;
 	public int PackHeader;
 	public int PackLength;
 	public int Flag;
@@ -33,6 +36,8 @@ public class AppControlSocket {
 		
 		FunctionType = receiveData[28];
 		ActionCode = receiveData[29];
+		
+		hearderLength = 30;
 		
 	}
 }

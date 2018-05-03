@@ -121,11 +121,10 @@ public class HttpClient {
 			@Override
 			public void onSuccess(int arg0, Header[] arg1, byte[] arg2) {
 				try {
-					JSONObject jo = new JSONObject(new String(arg2));
+					String mqttInfo = new String(arg2);
 					Message msg = new Message();
-					
 					msg.what = ActivityHandlerParams.DeviceGetMqttServer;
-					msg.obj = new String(arg2);
+					msg.obj = new String(mqttInfo);
 					handler.sendMessage(msg);
 				} catch (Exception e) {
 					// TODO: handle exception

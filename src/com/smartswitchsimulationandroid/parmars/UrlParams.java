@@ -10,7 +10,8 @@ public class UrlParams {
 	
 	/** 服务器IP地址以及端口 */
 	private static final String HOST = "http://118.178.184.73:8080/";
-	
+	/** MQTT服务器IP地址以及端口 */
+	public static final String MqttHost = "tcp://118.178.184.73:1883";
 	/** 基础URL路径 */
 	private static final String BASE_URL = "chinatimer/serviceClient/";
 	

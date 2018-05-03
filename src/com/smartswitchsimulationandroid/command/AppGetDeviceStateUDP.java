@@ -24,5 +24,14 @@ public class AppGetDeviceStateUDP {
 		Flag = receiveData[5] & 0xff;
 		CommandWord = ((receiveData[6] & 0xff) << 8) | (receiveData[7] & 0xff);
 	}
+	
+	public AppGetDeviceStateUDP(byte[] data){
+		byte[] receiveData = data;
+		
+		PackHeader = (receiveData[0] & 0xff << 24) | (receiveData[1] & 0xff << 16) | (receiveData[2] & 0xff << 8) | (receiveData[3] & 0xff);
+		PackLength = receiveData[4] & 0xff;
+		Flag = receiveData[5] & 0xff;
+		CommandWord = ((receiveData[6] & 0xff) << 8) | (receiveData[7] & 0xff);
+	}
 
 }

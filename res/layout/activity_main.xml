@@ -18,4 +18,14 @@
         android:layout_marginTop="22dp"
         android:text="设备注册" />
 
+    <Button
+        android:id="@+id/btConnectMqtt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/btRegister"
+        android:layout_alignBottom="@+id/btRegister"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="55dp"
+        android:text="连接MQTT" />
+
 </RelativeLayout>
