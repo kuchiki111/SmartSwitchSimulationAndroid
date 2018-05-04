@@ -13,6 +13,7 @@ public class AppControlSocket {
 	public int Flag;
 	public int CommandWord;
 	public String KeyCode;
+	byte [] KeyCodeValue;
 	public int Sn;
 	public byte FunctionType;
 	public byte ActionCode;
@@ -23,14 +24,11 @@ public class AppControlSocket {
 		Flag = receiveData[5] & 0xff;
 		CommandWord = ((receiveData[6] & 0xff) << 8) | (receiveData[7] & 0xff);
 		//KeyCode
-		byte [] KeyCodeValue = new byte[15];
+		KeyCodeValue = new byte[16];
+		System.arraycopy(receiveData, 8, KeyCodeValue, 0, 16);
 		KeyCode = "";
 		for(int i=0;i<KeyCodeValue.length;i++){
-			if(i == 0){
 				KeyCode += String.format("%02d", KeyCodeValue[i]);
-			}else {
-				KeyCode += String.format(".%02d", KeyCodeValue[i]);
-			}
 		}
 		Sn = (receiveData[24] & 0xff << 24) | (receiveData[25] & 0xff << 16) | (receiveData[26] & 0xff << 8) | (receiveData[27] & 0xff);
 		

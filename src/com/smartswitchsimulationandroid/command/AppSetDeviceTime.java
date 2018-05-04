@@ -23,11 +23,7 @@ public class AppSetDeviceTime {
 		byte [] KeyCodeValue = new byte[15];
 		KeyCode = "";
 		for(int i=0;i<KeyCodeValue.length;i++){
-			if(i == 0){
-				KeyCode += String.format("%02d", KeyCodeValue[i]);
-			}else {
-				KeyCode += String.format(".%02d", KeyCodeValue[i]);
-			}
+			KeyCode += String.format("%02d", KeyCodeValue[i]);
 		}
 		//time
 		time = new byte[5];

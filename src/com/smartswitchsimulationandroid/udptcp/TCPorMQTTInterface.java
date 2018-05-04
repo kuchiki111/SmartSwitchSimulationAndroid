@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.smartswitchsimulationandroid.command.AppControlSocket;
+import com.smartswitchsimulationandroid.command.AppGetDeviceParams;
 import com.smartswitchsimulationandroid.command.AppGetDeviceState;
 import com.smartswitchsimulationandroid.command.AppGetDeviceStateUDP;
+import com.smartswitchsimulationandroid.command.AppSetDeviceCountDown;
+import com.smartswitchsimulationandroid.command.AppSetDeviceMode;
 import com.smartswitchsimulationandroid.constant.ActivityHandlerParams;
 import com.smartswitchsimulationandroid.parmars.DeviceVariant;
 import com.smartswitchsimulationandroid.parmars.ToolParams;
@@ -148,24 +151,30 @@ public abstract class TCPorMQTTInterface {
 					mHandler.sendMessage(msg);		
 				}
 					break;
-				case UDPTCPCommand.APP_CONTROL_SOCKET_ACK: {
+				case UDPTCPCommand.APP_CONTROL_SOCKET: {
 					AppControlSocket appControlSocket = new AppControlSocket(data);
 					Message msg = new Message();
 					switch(appControlSocket.ActionCode){
 					case DeviceVariant.QueryDeviceStatus:{
-						msg.what = ActivityHandlerParams.AppGetDeviceParams;
+						msg.obj = appControlSocket;
+						msg.what = ActivityHandlerParams.AppGetDeviceStateMQTT;
 						mHandler.sendMessage(msg);
 					}
 						break;
 					case DeviceVariant.QueryDeviceParams:{
-						msg.what = ActivityHandlerParams.AppGetDeviceStateUDP;
+						AppGetDeviceParams appGetDeviceParams = new AppGetDeviceParams(data);
+						msg.obj = appGetDeviceParams;
+						msg.what = ActivityHandlerParams.AppGetDeviceParams;
 						mHandler.sendMessage(msg);
 						
 					}
 						break;	
 						
 					case DeviceVariant.DeviceModeChange:{
-						
+						AppSetDeviceMode appSetDeviceMode = new AppSetDeviceMode(data);
+						msg.obj = appSetDeviceMode;
+						msg.what = ActivityHandlerParams.DeviceModeChange;
+						mHandler.sendMessage(msg);
 					}
 						break;	
 					case DeviceVariant.DeviceCycleTiming:{
@@ -173,7 +182,10 @@ public abstract class TCPorMQTTInterface {
 					}
 						break;	
 					case DeviceVariant.DeviceCountDown:{
-						
+						AppSetDeviceCountDown appSetDeviceCountDown = new AppSetDeviceCountDown(data);
+						msg.obj = appSetDeviceCountDown;
+						msg.what = ActivityHandlerParams.DeviceCountDown;
+						mHandler.sendMessage(msg);
 					}
 						break;	
 					}

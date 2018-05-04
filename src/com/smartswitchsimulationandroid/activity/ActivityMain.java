@@ -1,5 +1,6 @@
 package com.smartswitchsimulationandroid.activity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -9,17 +10,21 @@ import com.smartswitchsimulationandroid.command.AppControlSocketAckBase;
 import com.smartswitchsimulationandroid.command.AppGetDeviceParams;
 import com.smartswitchsimulationandroid.command.AppGetDeviceStateUDPAck;
 import com.smartswitchsimulationandroid.command.AppSearchWifiAck;
+import com.smartswitchsimulationandroid.command.AppSetDeviceCountDown;
+import com.smartswitchsimulationandroid.command.AppSetDeviceMode;
 import com.smartswitchsimulationandroid.command.DeviceOnlineUDP;
 import com.smartswitchsimulationandroid.constant.ActivityHandlerParams;
 import com.smartswitchsimulationandroid.datatransmission.HttpClient;
 import com.smartswitchsimulationandroid.device.TimeSettingInfo;
 import com.smartswitchsimulationandroid.mqtt.MyMqtt;
 import com.smartswitchsimulationandroid.parmars.DeviceVariant;
+import com.smartswitchsimulationandroid.parmars.MD5Util;
 import com.smartswitchsimulationandroid.parmars.SharedPreferencesParams;
 import com.smartswitchsimulationandroid.parmars.ToolParams;
 import com.smartswitchsimulationandroid.tools.GetMac;
 import com.smartswitchsimulationandroid.udptcp.ReceivePoolUDP;
 
+import android.R.color;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -35,6 +40,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class ActivityMain extends Activity {
@@ -55,6 +61,28 @@ public class ActivityMain extends Activity {
 	private String DEVICE_VER ;
 	private String DEVICE_PASSCODE ;
 	
+	private TextView tvWorkMode;
+	private TextView tvOutputState;
+	private TextView tvMQTTEnable;
+	private TextView tvDelay;
+	private TextView tvDuration;
+	private TextView tvCompletedModeCP;
+	private TextView tvOutputStateCP;
+	
+	private Button light;
+	
+	/** CountdownParameter*/
+	private byte [] Delay = new byte[2];
+	private int DelayX;
+	private int DelayY;
+	private byte [] Duration = new byte[2];
+	private int DurationX;
+	private int DurationY;
+	private int CompletedModeCP;
+	private int OutputStateCP;
+	
+	private String KeyCodeStr = "";
+	
 	private int WorkMode ;
 	private int OutputState;
 	private int MQTTEnable;
@@ -63,8 +91,10 @@ public class ActivityMain extends Activity {
 	
 	SharedPreferences deviceInfo;
 	SharedPreferences deviceStatus;
+	SharedPreferences countdownParameter;
 	
 	List<TimeSettingInfo> timeSettingInfos;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -84,8 +114,19 @@ public class ActivityMain extends Activity {
 	 * ≥ı ºªØ“≥√Ê
 	 */
 	private void initViews() {
+		
 		btRegister = (Button) findViewById(R.id.btRegister);
 		btConnectMQTT = (Button) findViewById(R.id.btConnectMqtt);
+		
+		tvWorkMode = (TextView) findViewById(R.id.tvWorkMode);
+		tvOutputState = (TextView) findViewById(R.id.tvOutputState);
+		tvMQTTEnable = (TextView) findViewById(R.id.tvMQTTEnable);
+		tvDelay = (TextView) findViewById(R.id.tvDelay);
+		tvDuration = (TextView) findViewById(R.id.tvDuration);
+		tvCompletedModeCP = (TextView) findViewById(R.id.tvCompletedModeCP);
+		tvOutputStateCP = (TextView) findViewById(R.id.tvOutputStateCP);
+		
+		light = (Button) findViewById(R.id.light);
 		
 	}
 	
@@ -118,6 +159,7 @@ public class ActivityMain extends Activity {
 	public void initParam(){
 		deviceInfo = getSharedPreferences(SharedPreferencesParams.CONFIG_INFORMATION, Context.MODE_PRIVATE);
 		deviceStatus = getSharedPreferences(SharedPreferencesParams.DEVICE_STATUS, Context.MODE_PRIVATE);
+		countdownParameter = getSharedPreferences(SharedPreferencesParams.COUNT_DOWN_PARMETER, Context.MODE_PRIVATE);
 		boolean isFirst = deviceInfo.getBoolean(SharedPreferencesParams.FIRST_IN, true);
 		if (isFirst){
 			DEVICE_MAC = GetMac.getMacAddr();
@@ -139,6 +181,15 @@ public class ActivityMain extends Activity {
 			editor.putInt(SharedPreferencesParams.DEVICE_OUTPUT_STATE, 1);
 			editor.putInt(SharedPreferencesParams.DEVICE_MQTT_ENABLE, 1);
 			editor.commit();
+			
+			editor = countdownParameter.edit();
+			editor.putInt("DelayX", 0);
+			editor.putInt("DelayY", 0);
+			editor.putInt("DurationX", 0);
+			editor.putInt("DurationY", 0);
+			editor.putInt("CompletedModeCP", 0);
+			editor.putInt("OutputStateCP", 0);
+			editor.commit();
 		}
 		
 		DEVICE_MAC = deviceInfo.getString(SharedPreferencesParams.DEVICE_MAC, "");
@@ -150,6 +201,18 @@ public class ActivityMain extends Activity {
 		OutputState = deviceStatus.getInt(SharedPreferencesParams.DEVICE_OUTPUT_STATE, 1);
 		MQTTEnable = deviceStatus.getInt(SharedPreferencesParams.DEVICE_MQTT_ENABLE, 1);
 		
+		Delay[0] =  (byte) countdownParameter.getInt("DelayX", 0);
+		Delay[1] =  (byte) countdownParameter.getInt("DelayY", 0);
+		Duration[0] = (byte) countdownParameter.getInt("DurationX", 0);
+		Duration[1] = (byte) countdownParameter.getInt("DurationY", 0);
+		CompletedModeCP = countdownParameter.getInt("CompletedModeCP", 0);
+		OutputStateCP = countdownParameter.getInt("OutputStateCP", 1);
+		
+		initKeycode();
+		initTimeSettingInfos();
+		upDataTvDeviceStatus(WorkMode,OutputState,MQTTEnable);
+		upDataTvCountdownParameter(Delay[0],Delay[1],Duration[0],Duration[1],CompletedModeCP,OutputStateCP);
+//		light(OutputState);
 		new Handler().postDelayed(new Runnable() {
 			
 			@Override
@@ -219,6 +282,9 @@ public class ActivityMain extends Activity {
 				break;
 				
 			case ActivityHandlerParams.AppGetDeviceStateUDP:
+				WorkMode = deviceStatus.getInt(SharedPreferencesParams.DEVICE_WORK_MODE, 0);
+				OutputState = deviceStatus.getInt(SharedPreferencesParams.DEVICE_OUTPUT_STATE, 1);
+				MQTTEnable = deviceStatus.getInt(SharedPreferencesParams.DEVICE_MQTT_ENABLE, 1);
 				AppGetDeviceStateUDPAck appGetDeviceStateUDPAck = new AppGetDeviceStateUDPAck(WorkMode,OutputState,MQTTEnable);
 				if (DeviceVariant.umReceivePoolUdp != null){
 					DeviceVariant.umReceivePoolUdp.InsertSendItem(appGetDeviceStateUDPAck.getData(), msg.obj.toString());
@@ -226,15 +292,71 @@ public class ActivityMain extends Activity {
 				break;
 			
 			case ActivityHandlerParams.AppGetDeviceStateMQTT:
-				AppGetDeviceStateUDPAck appGetDeviceStateMQTT = new AppGetDeviceStateUDPAck(WorkMode,OutputState,MQTTEnable);
+				int workMode = deviceStatus.getInt(SharedPreferencesParams.DEVICE_WORK_MODE, 0);
+				int outputState = deviceStatus.getInt(SharedPreferencesParams.DEVICE_OUTPUT_STATE, 1);
+				int mQTTEnable = deviceStatus.getInt(SharedPreferencesParams.DEVICE_MQTT_ENABLE, 1);
+				AppGetDeviceStateUDPAck appGetDeviceStateMQTT = new AppGetDeviceStateUDPAck(workMode,outputState,mQTTEnable);
 				DeviceVariant.umMqtt.insertItem(appGetDeviceStateMQTT.getData(), false);
 				break;
 				
 			case ActivityHandlerParams.AppGetDeviceParams:
-				AppControlSocketAckBase appGetDeviceParams = new AppControlSocketAckBase(0,timeSettingInfos);
-				DeviceVariant.umMqtt.insertItem(appGetDeviceParams.getData(), false);
+				if(msg.obj!=null){
+					if (msg.obj instanceof AppGetDeviceParams){
+						AppGetDeviceParams request = (AppGetDeviceParams) msg.obj;
+						if (KeyCodeStr.equals(request.KeyCode)){
+							AppControlSocketAckBase appGetDeviceParams = new AppControlSocketAckBase(0,timeSettingInfos,Delay,Duration,CompletedModeCP,OutputStateCP);
+							DeviceVariant.umMqtt.insertItem(appGetDeviceParams.getData(), false);
+						}else{
+							AppControlSocketAckBase appGetDeviceParams = new AppControlSocketAckBase(1,timeSettingInfos,Delay,Duration,CompletedModeCP,OutputStateCP);
+							DeviceVariant.umMqtt.insertItem(appGetDeviceParams.getData(), false);
+						}
+						
+					}
+				}
 				break;
+			
+			case ActivityHandlerParams.DeviceModeChange:
+				if(msg.obj!=null){
+					if (msg.obj instanceof AppSetDeviceMode){
+						AppSetDeviceMode request = (AppSetDeviceMode) msg.obj;
+						if (KeyCodeStr.equals(request.KeyCode)){
+							upDataTvDeviceStatus(request.workMode, request.outputState, 1);
+//							light(request.outputState);
+							upDataDeviceStatus(request.workMode, request.outputState, 1);
+							AppControlSocketAckBase appSetDeviceMode = new AppControlSocketAckBase(0,request.workMode,request.outputState);
+							DeviceVariant.umMqtt.insertItem(appSetDeviceMode.getData(), false);
+						}else{
+							AppControlSocketAckBase appSetDeviceMode = new AppControlSocketAckBase(1,request.workMode,request.outputState);
+							DeviceVariant.umMqtt.insertItem(appSetDeviceMode.getData(), false);
+						}
+						
+					}
+				}
+				break;
+				
+			case ActivityHandlerParams.DeviceCountDown:
+				if(msg.obj!=null){
+					if (msg.obj instanceof AppSetDeviceCountDown){
+						AppSetDeviceCountDown request = (AppSetDeviceCountDown) msg.obj;
+						if (KeyCodeStr.equals(request.KeyCode)){
+							upDataTvCountdownParameter(request.delayTime[0],request.delayTime[1],request.duration[0],request.duration[1],request.completedMode,request.completedOutputState);
+							upDataCountdownParameter(request.delayTime[0],request.delayTime[1],request.duration[0],request.duration[1],request.completedMode,request.completedOutputState);
+							changeMode(2);
+							AppControlSocketAckBase appSetDeviceCountDown = new AppControlSocketAckBase(0,request.delayTime,request.duration,request.completedMode,request.completedOutputState);
+							DeviceVariant.umMqtt.insertItem(appSetDeviceCountDown.getData(), false);
+						}else{
+							AppControlSocketAckBase appGetDeviceParams = new AppControlSocketAckBase(1,request.delayTime,request.duration,request.completedMode,request.completedOutputState);
+							DeviceVariant.umMqtt.insertItem(appGetDeviceParams.getData(), false);
+						}
+						
+					}
+				}
+				break;
+				
 			}
+			
+			
+			
 		}
 	};
 	
@@ -281,5 +403,65 @@ public class ActivityMain extends Activity {
 		inSubTopics[0] = "app2device/" + DEVICE_DID;
 		
 		DeviceVariant.umMqtt.init(ActivityMain.this, publishTopic, inSubTopics, handler);
+	}
+	
+	private void initKeycode(){
+		String keycode = DEVICE_DID+DEVICE_PASSCODE;
+		byte[] keyCodeMD5;
+		keyCodeMD5 = MD5Util.MD5_16(keycode).getBytes();
+		for(int i=0;i<16;i++){
+			KeyCodeStr += String.format("%02d", keyCodeMD5[i]);
+		}
+	}
+	private void initTimeSettingInfos(){
+		timeSettingInfos = new ArrayList<TimeSettingInfo>();
+		TimeSettingInfo deleteTimeSettingInfo = new TimeSettingInfo(1, 0, 0, 0, 0, 0, 0, (byte) 0, (byte) 0);
+		timeSettingInfos.add(deleteTimeSettingInfo);
+	}
+	
+	private void upDataDeviceStatus(int WorkMode, int OutputState, int MQTTEnable ){
+		Editor editor = deviceStatus.edit();
+		editor.putInt(SharedPreferencesParams.DEVICE_WORK_MODE, WorkMode);
+		editor.putInt(SharedPreferencesParams.DEVICE_OUTPUT_STATE, OutputState);
+		editor.putInt(SharedPreferencesParams.DEVICE_MQTT_ENABLE, MQTTEnable);
+		editor.commit();
+	}
+	
+	private void upDataCountdownParameter(int DelayX, int DelayY, int DurationX, int DurationY, int CompletedModeCP, int OutputStateCP){
+		Editor editor = countdownParameter.edit();
+		editor.putInt("DelayX", DelayX);
+		editor.putInt("DelayY", DelayY);
+		editor.putInt("DurationX", DurationX);
+		editor.putInt("DurationY", DurationY);
+		editor.putInt("CompletedModeCP", CompletedModeCP);
+		editor.putInt("OutputStateCP", OutputStateCP);
+		editor.commit();
+	}
+	
+	private void upDataTvDeviceStatus(int WorkMode, int OutputState, int MQTTEnable ){
+		tvWorkMode.setText(WorkMode+"");
+		tvOutputState.setText(OutputState+"");
+		tvMQTTEnable.setText(MQTTEnable+"");
+	}
+	
+	private void upDataTvCountdownParameter(int DelayX, int DelayY, int DurationX, int DurationY, int CompletedModeCP, int OutputStateCP){
+		tvDelay.setText((DelayX+"")+":"+(DelayY+""));
+		tvDuration.setText((DurationX+"")+":"+(DurationY+""));
+		tvCompletedModeCP.setText(CompletedModeCP+"");
+		tvOutputStateCP.setText(OutputStateCP+"");
+	}
+	
+	private void light(int OutputState){
+		if(OutputState == 1){
+			light.setBackgroundColor(color.holo_red_light);
+		}else{
+			light.setBackgroundColor(color.darker_gray);
+		}
+	}
+	
+	private void changeMode(int WorkMode){
+		Editor editor = deviceStatus.edit();
+		editor.putInt(SharedPreferencesParams.DEVICE_WORK_MODE, WorkMode);
+		editor.commit();
 	}
 }

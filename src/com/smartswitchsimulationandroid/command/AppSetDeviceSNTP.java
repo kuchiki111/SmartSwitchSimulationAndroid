@@ -24,11 +24,7 @@ public class AppSetDeviceSNTP {
 		byte [] KeyCodeValue = new byte[15];
 		KeyCode = "";
 		for(int i=0;i<KeyCodeValue.length;i++){
-			if(i == 0){
-				KeyCode += String.format("%02d", KeyCodeValue[i]);
-			}else {
-				KeyCode += String.format(".%02d", KeyCodeValue[i]);
-			}
+			KeyCode += String.format("%02d", KeyCodeValue[i]);
 		}
 		//SntpNumber
 		SntpNumber = receiveData[24];
@@ -37,11 +33,7 @@ public class AppSetDeviceSNTP {
 		byte[] SntpURLValue = new byte[SntpURLLength];
 		SntpURL = "";
 		for(int i=0;i<SntpURLValue.length;i++){
-			if(i == 0){
-				SntpURL += String.format("%02d", SntpURLValue[i]);
-			}else {
-				SntpURL += String.format(".%02d", SntpURLValue[i]);
-			}
-		}		
+			SntpURL += String.format("%02d", SntpURLValue[i]);	
+		}
 	}
 }

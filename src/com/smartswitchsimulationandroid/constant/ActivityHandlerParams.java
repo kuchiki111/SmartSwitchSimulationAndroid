@@ -9,6 +9,8 @@ public class ActivityHandlerParams {
 	
 	public static final int AppGetDeviceStateMQTT = 5;
 	public static final int AppGetDeviceParams = 6;
+	public static final int DeviceModeChange = 7;
+	public static final int DeviceCountDown =  8;
 	
 	/** Éè±¸×¢²á*/
 	public static final int DeviceRegister = 1000;

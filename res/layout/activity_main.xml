@@ -1,31 +1,190 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     tools:context="com.smartswitchsimulationandroid.activity.ActivityMain" >
 
-    <Button
-        android:id="@+id/btRegister"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center" >
+
+        <Button
+            android:id="@+id/btRegister"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="设备注册" />
+
+        <Button
+            android:id="@+id/btConnectMqtt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:text="连接MQTT" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvDeviceStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="21dp"
-        android:layout_marginTop="22dp"
-        android:text="设备注册" />
+        android:text="DeviceStatus:" 
+        android:layout_marginTop="20dp"/>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="5dp" >
 
-    <Button
-        android:id="@+id/btConnectMqtt"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/tvWorkMode1"
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:text="WorkMode:" />
+            
+            <TextView
+                android:id="@+id/tvWorkMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="" />
+
+        </LinearLayout>
+         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+             <TextView
+                 android:id="@+id/tvOutputState1"
+                 android:layout_width="130dp"
+                 android:layout_height="wrap_content"
+                 android:text="OutputState:" />
+             
+             <TextView
+                 android:id="@+id/tvOutputState"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="" />
+
+        </LinearLayout>
+         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+             <TextView
+                 android:id="@+id/tvMQTTEnable1"
+                 android:layout_width="130dp"
+                 android:layout_height="wrap_content"
+                 android:text="MQTTEnable:" />
+             
+             <TextView
+                 android:id="@+id/tvMQTTEnable"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="" />
+
+        </LinearLayout>
+        
+         
+
+    </LinearLayout>
+    
+    <TextView
+        android:id="@+id/tvCountdownParameter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/btRegister"
-        android:layout_alignBottom="@+id/btRegister"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="55dp"
-        android:text="连接MQTT" />
+        android:text="CountdownParameter:" 
+        android:layout_marginTop="20dp"/>
+        
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="5dp" >
 
-</RelativeLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/Delay1"
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:text="Delay:" />
+            
+            <TextView
+                android:id="@+id/tvDelay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="" />
+
+        </LinearLayout>
+         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+             <TextView
+                 android:id="@+id/tvDuration1"
+                 android:layout_width="130dp"
+                 android:layout_height="wrap_content"
+                 android:text="Duration:" />
+             
+             <TextView
+                 android:id="@+id/tvDuration"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="" />
+
+        </LinearLayout>
+         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+             <TextView
+                 android:id="@+id/tvCompletedModeCP1"
+                 android:layout_width="130dp"
+                 android:layout_height="wrap_content"
+                 android:text="CompletedModeCP:" />
+             
+             <TextView
+                 android:id="@+id/tvCompletedModeCP"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="" />
+
+        </LinearLayout>
+        
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+             <TextView
+                 android:id="@+id/tvOutputStateCP1"
+                 android:layout_width="130dp"
+                 android:layout_height="wrap_content"
+                 android:text="OutputStateCP:" />
+             
+             <TextView
+                 android:id="@+id/tvOutputStateCP"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="" />
+
+        </LinearLayout>
+
+	</LinearLayout>
+
+    <Button
+        android:id="@+id/light"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="50dp"
+        android:layout_gravity="center"/>
+	
+</LinearLayout>

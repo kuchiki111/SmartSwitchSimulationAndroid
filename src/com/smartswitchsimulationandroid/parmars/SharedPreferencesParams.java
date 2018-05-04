@@ -11,7 +11,8 @@ public class SharedPreferencesParams {
 	 */
 	public static final String CONFIG_INFORMATION = "device.config";
 	public static final String DEVICE_STATUS = "device.status";
-
+	public static final String COUNT_DOWN_PARMETER = "device.countdownparameter";
+	
 	public static final String LOGIN_USERNAME = "LOGIN_USERNAME";
 
 	public static final String LOGIN_PASSWORD = "LOGIN_PASSWORD";

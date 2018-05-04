@@ -23,11 +23,7 @@ public class AppLoginDevice {
 		byte[] PassCodeValue = new byte[PassCodeLength];
 		PassCode = "";
 		for(int i=0;i<PassCodeValue.length;i++){
-			if(i == 0){
 				PassCode += String.format("%02d", PassCodeValue[i]);
-			}else{
-				PassCode += String.format(".%02d", PassCodeValue[i]);
-			}
 		}
 	}
 }
